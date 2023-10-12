@@ -191,6 +191,14 @@ namespace mn {
             ///             std::system_error() if device has been disconnected.
             void ReadBinary(std::vector<uint8_t>& data);
 
+            /// \brief      Use to read binary data from the COM port.
+            /// \param      data        The read bytes from the COM port will be appended to this vector.
+            /// \param      n_bytes     Read at most this many bytes.
+            /// \note       Use Read() if you want to interpret received data as a string.
+            /// \throws     CppLinuxSerial::Exception if state != OPEN.
+            ///             std::system_error() if device has been disconnected.
+            void ReadBinary(std::vector<uint8_t> &data, size_t n_max_bytes);
+
             /// \brief		Use to get number of bytes available in receive buffer.
             /// \returns    The number of bytes available in the receive buffer (ready to be read).
             /// \throws		CppLinuxSerial::Exception if state != OPEN.
@@ -209,10 +217,10 @@ namespace mn {
             // void SetTermios(termios myTermios);
 
             /// \brief      Returns a populated termios2 structure for the serial port pointed to by the file descriptor.
-            termios2 GetTermios2();
+            [[nodiscard]] termios2 GetTermios2() const;
 
             /// \brief      Assigns the provided tty settings to the serial port pointed to by the file descriptor.
-            void SetTermios2(termios2 tty);
+            void SetTermios2(termios2 tty) const;
 
             /// \brief      checks whether the port is open or not
             /// \param      prettyFunc  Function details obtained using __PRETTY_FUNCTION__
@@ -232,7 +240,7 @@ namespace mn {
             BaudRate baudRateStandard_;
 
             /// \brief      The current baud rate if baudRateType_ == CUSTOM.
-            speed_t baudRateCustom_;
+            speed_t baudRateCustom_{};
 
             /// \brief      The num. of data bits. Defaults to 8 (most common).
             NumDataBits numDataBits_ = NumDataBits::EIGHT;
@@ -250,7 +258,7 @@ namespace mn {
             SoftwareFlowControl softwareFlowControl_ = SoftwareFlowControl::OFF;
 
             /// \brief      The file descriptor for the open file. This gets written to when Open() is called.
-            int fileDesc_;
+            int fileDesc_{};
 
             bool echo_;
 

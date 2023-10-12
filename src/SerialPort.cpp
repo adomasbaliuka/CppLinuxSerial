@@ -8,13 +8,13 @@
 //!             See README.rst in repo root dir for more info.
 
 // System includes
-#include <iostream>
-#include <sstream>
-#include <stdio.h>      // Standard input/output definitions
-#include <string.h>     // String function definitions
+//#include <iostream>
+//#include <sstream>
+//#include <stdio.h>      // Standard input/output definitions
+//#include <string.h>     // String function definitions
 #include <unistd.h>     // UNIX standard function definitions
 #include <fcntl.h>      // File control definitions
-#include <errno.h>      // Error number definitions
+#include <cerrno>      // Error number definitions
 // #include <termios.h>     // POSIX terminal control definitions (struct termios)
 #include <system_error>	// For throwing std::system_error
 #include <sys/ioctl.h> // Used for TCGETS2, which is required for custom baud rates
@@ -23,7 +23,7 @@
 #include <asm/ioctls.h>
 #include <asm/termbits.h>
 #include <algorithm>
-#include <iterator>
+//#include <iterator>
 
 // User includes
 #include "CppLinuxSerial/Exception.hpp"
@@ -40,7 +40,7 @@ namespace CppLinuxSerial {
         baudRateType_ = BaudRateType::STANDARD;
         baudRateStandard_ = defaultBaudRate_;
         readBufferSize_B_ = defaultReadBufferSize_B_;
-        readBuffer_.reserve(readBufferSize_B_);
+        readBuffer_.resize(readBufferSize_B_);  // allocate -> resize. Cleaner because we use this memory via pointer.
         state_ = State::CLOSED;
     }
 
@@ -486,7 +486,7 @@ namespace CppLinuxSerial {
     void SerialPort::Write(const std::string& data) {
         PortIsOpened(__PRETTY_FUNCTION__);
 
-        int writeResult = write(fileDesc_, data.c_str(), data.size());
+        ssize_t writeResult = write(fileDesc_, data.c_str(), data.size());
 
         // Check status
         if (writeResult == -1) {
@@ -497,7 +497,7 @@ namespace CppLinuxSerial {
     void SerialPort::WriteBinary(const std::vector<uint8_t>& data) {
         PortIsOpened(__PRETTY_FUNCTION__);
 
-        int writeResult = write(fileDesc_, data.data(), data.size());
+        ssize_t writeResult = write(fileDesc_, data.data(), data.size());
 
         // Check status
         if (writeResult == -1) {
@@ -528,7 +528,7 @@ namespace CppLinuxSerial {
                 throw std::system_error(EFAULT, std::system_category());
             }
         }
-        else if(n > 0) {
+        else {
             data += std::string(&readBuffer_[0], n);
         }
 
@@ -556,8 +556,39 @@ namespace CppLinuxSerial {
             if(rv != 0) {
                 throw std::system_error(EFAULT, std::system_category());
             }
-        } else if(n > 0) {
-            std::copy(readBuffer_.begin(), readBuffer_.begin() + n, back_inserter(data));
+        } else {
+            std::copy(readBuffer_.begin(), readBuffer_.begin() + n, std::back_inserter(data));
+        }
+
+        // If code reaches here, read must of been successful
+    }
+
+    void SerialPort::ReadBinary(std::vector<uint8_t>& data, std::size_t n_max_bytes) {
+        PortIsOpened(__PRETTY_FUNCTION__);
+
+        // Read from file
+        // We provide the underlying raw array from the readBuffer_ vector to this C api.
+        // This will work because we do not delete/resize the vector while this method
+        // is called
+        if (readBuffer_.size() < n_max_bytes) {
+            readBuffer_.resize(n_max_bytes);
+        }
+        ssize_t n = read(fileDesc_, &readBuffer_[0], n_max_bytes);
+
+        // Error Handling
+        if(n < 0) {
+            // Read was unsuccessful
+            throw std::system_error(EFAULT, std::system_category());
+        } else if(n == 0) {
+            // n == 0 means EOS, but also returned on device disconnection. We try to get termios2 to distinguish two these two states
+            struct termios2 term2;
+            int rv = ioctl(fileDesc_, TCGETS2, &term2);
+
+            if(rv != 0) {
+                throw std::system_error(EFAULT, std::system_category());
+            }
+        } else {
+            std::copy(readBuffer_.begin(), readBuffer_.begin() + n, std::back_inserter(data));
         }
 
         // If code reaches here, read must of been successful
@@ -598,7 +629,7 @@ namespace CppLinuxSerial {
     // 	// Successful!
     // }
 
-    termios2 SerialPort::GetTermios2()
+    termios2 SerialPort::GetTermios2() const
     {
         struct termios2 term2;
 
@@ -614,7 +645,7 @@ namespace CppLinuxSerial {
         // ioctl(fd, TCSETS2, &term2);
     }
 
-    void SerialPort::SetTermios2(termios2 tty)
+    void SerialPort::SetTermios2(termios2 tty) const
     {
         ioctl(fileDesc_, TCSETS2, &tty);
     }

@@ -38,8 +38,8 @@ namespace mn {
             /// \brief      Executes a command on the Linux command-line.
             /// \details    Blocks until command is complete.
             /// \throws     std::runtime_error is popen() fails.
-            std::string Exec(const std::string &cmd) {
-                std::array<char, 128> buffer;
+            static std::string Exec(const std::string &cmd) {
+                std::array<char, 128> buffer{};
                 std::string result;
                 std::shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
                 if (!pipe) throw std::runtime_error("popen() failed!");
@@ -52,7 +52,7 @@ namespace mn {
                 return result;
             }
 
-            void CreateVirtualSerialPortPair() {
+            void CreateVirtualSerialPortPair() const {
                 std::cout << "Creating virtual serial port pair..." << std::endl;
                 std::system((std::string("nohup sudo socat -d -d pty,raw,echo=0,link=") 
                     + device0Name_ + " pty,raw,echo=0,link="
@@ -65,17 +65,17 @@ namespace mn {
                 std::system((std::string("sudo chmod a+rw ") + GetDevice1Name()).c_str());
             }
 
-            void CloseSerialPorts() {
+            static void CloseSerialPorts() {
                 // Dangerous! Kills all socat processes running
                 // on computer
                 std::system("sudo pkill socat");
             }
 
-            std::string GetDevice0Name() {
+            [[nodiscard]] std::string GetDevice0Name() const {
                 return device0Name_;
             }
 
-            std::string GetDevice1Name() {
+            [[nodiscard]] std::string GetDevice1Name() const {
                 return device1Name_;
             }
 

@@ -28,9 +28,7 @@ namespace mn {
                 msg_ = std::string(file) + ":" + std::to_string(line) + ": " + arg;
             }
 
-            ~Exception() throw() {}
-
-            const char *what() const throw() override {
+            [[nodiscard]] const char *what() const noexcept override {
                 return msg_.c_str();
             }
 
@@ -41,7 +39,7 @@ namespace mn {
     } // namespace CppLinuxSerial
 } // namespace mn
 
-#define THROW_EXCEPT(arg) throw Exception(__FILE__, __LINE__, arg);
+#define THROW_EXCEPT(arg) do { throw Exception(__FILE__, __LINE__, arg); } while(false)
 
 
 #endif // MN_CPP_LINUX_SERIAL_EXCEPTION_H_
