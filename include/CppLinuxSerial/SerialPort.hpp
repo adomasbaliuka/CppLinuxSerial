@@ -119,6 +119,11 @@ namespace mn {
             /// \brief      Constructor that sets up serial port with the basic parameters, and a custom baud rate.
             SerialPort(const std::string &device, speed_t baudRate);
 
+            /// \brief     disallow copy construction because it seems to cause crashes if allowed and done!
+            SerialPort(const SerialPort&) = delete;
+            /// \brief     disallow copy assignment because it seems to cause crashes if allowed and done!
+            SerialPort& operator=(const SerialPort& other) = delete;
+
             /// \brief      Destructor. Closes serial port if still open.
             virtual ~SerialPort();
 
