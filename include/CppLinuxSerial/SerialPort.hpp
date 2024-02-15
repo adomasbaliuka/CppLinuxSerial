@@ -211,6 +211,8 @@
             /// \returns        The state of the serial port
             State GetState();
 
+            bool log_messages_to_file{false};
+            std::string log_file_path{"tmp_SerialPort_log.txt"};
         private:
 
             /// \brief      Configures the tty device as a serial port.

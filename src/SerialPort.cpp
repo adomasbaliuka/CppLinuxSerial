@@ -490,6 +490,14 @@ namespace mn::CppLinuxSerial {
         // Check status
         if (writeResult == -1) {
             throw std::system_error(EFAULT, std::system_category());
+        } else if (log_messages_to_file) {
+            std::ofstream log(log_file_path, std::ios_base::app);
+            log << std::endl;
+            for (auto b : data) {
+                log << b;
+            }
+            log << std::endl;
+            log.close();
         }
     }
 
@@ -501,6 +509,15 @@ namespace mn::CppLinuxSerial {
         // Check status
         if (writeResult == -1) {
             throw std::system_error(EFAULT, std::system_category());
+        } else if (log_messages_to_file) {
+            std::ofstream log(log_file_path, std::ios_base::app);
+            log.open(log_file_path);
+            log << std::endl;
+            for (auto b : data) {
+                log << b;
+            }
+            log << std::endl;
+            log.close();
         }
     }
 
