@@ -31,8 +31,7 @@
 
 #define    BOTHER 0010000
 
-namespace mn {
-namespace CppLinuxSerial {
+namespace mn::CppLinuxSerial {
 
     SerialPort::SerialPort() {
         echo_ = false;
@@ -695,5 +694,5 @@ namespace CppLinuxSerial {
       return state_;
     }
 
-} // namespace CppLinuxSerial
-} // namespace mn
+} // namespace mn::CppLinuxSerial
+

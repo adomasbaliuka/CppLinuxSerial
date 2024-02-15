@@ -27,11 +27,11 @@
 // User headers
 #include "Exception.hpp"
 
-namespace mn {
-    namespace CppLinuxSerial {
+
+    namespace mn::CppLinuxSerial {
 
         /// \brief      Represents the baud rate "types" that can be used with the serial port. STANDARD represents all
-        ///             the standard baud rates as provided by UNIX, CUSTOM represents a baud rate defined by an arbitray integer.
+        ///             the standard baud rates as provided by UNIX, CUSTOM represents a baud rate defined by an arbitrary integer.
         enum class BaudRateType {
             STANDARD,
             CUSTOM,
@@ -150,7 +150,7 @@ namespace mn {
             void SetNumStopBits(NumStopBits numStopBits);
 
             /// \brief      Sets the read timeout (in milliseconds)/blocking mode.
-            /// \details    Only call when state != OPEN. This method manupulates VMIN and VTIME.
+            /// \details    Only call when state != OPEN. This method manipulates VMIN and VTIME.
             /// \param      timeout_ms  Set to -1 to infinite timeout, 0 to return immediately with any data (non
             ///             blocking, or >0 to wait for data for a specified number of milliseconds). Timeout will
             ///             be rounded to the nearest 100ms (a Linux API restriction). Maximum value limited to
@@ -276,7 +276,7 @@ namespace mn {
 
         };
 
-    } // namespace CppLinuxSerial
-} // namespace mn
+    } // namespace mn::CppLinuxSerial
+
 
 #endif // #ifndef SERIAL_PORT_SERIAL_PORT_H
